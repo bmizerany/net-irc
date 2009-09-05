@@ -1,10 +1,10 @@
-require 'net/protocol'
 require 'strscan'
 require 'yaml'
 require 'logger'
+require 'socket'
 
 module Net
-  class IRC < Protocol
+  class IRC
     include Enumerable
 
     class << self
@@ -218,7 +218,7 @@ module Net
       def write(socket)
         line = to_s
         IRC.logger.debug ">>>>> #{line.inspect}"
-        socket.writeline(line)
+        socket.write(line + "\r\n")
       end
       
       class << self
@@ -805,7 +805,7 @@ module Net
 
     private
     def do_start(user, password, realname, nickname = nil)
-      @socket = InternetMessageIO.old_open(@address, @port)
+      @socket = TCPSocket.new(@address, @port)
       pass(password) unless password.nil? || password.empty?
       nick(user)
       user(user, realname)
